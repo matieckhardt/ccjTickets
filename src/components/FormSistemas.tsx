@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { Table, Button, TextInput, Notification } from '@mantine/core';
-import { DatePickerInput } from '@mantine/dates';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import { Table, Button, TextInput, Notification } from "@mantine/core";
+import { DatePickerInput } from "@mantine/dates";
+import axios from "axios";
 
 interface Props {
   usuarios: {
@@ -12,9 +12,11 @@ interface Props {
     dateTicket: string;
     presupuesto: number;
     descripUser: string;
+    descripSist: string;
     dirAprobe: boolean;
-    dateSolved: string;
-    
+    dateSolved: Date;
+    estimFin: Date;
+    requiereCompras: string;
   }[];
 }
 
@@ -33,7 +35,9 @@ function FormSistemas(props: Props) {
 
   useEffect(() => {
     // Cargar filas enviadas desde el almacenamiento local al iniciar la página
-    const submittedRowsFromStorage = localStorage.getItem('submittedRowsSistemas');
+    const submittedRowsFromStorage = localStorage.getItem(
+      "submittedRowsSistemas"
+    );
     if (submittedRowsFromStorage) {
       setSubmittedRows(new Set(JSON.parse(submittedRowsFromStorage)));
     }
@@ -45,7 +49,7 @@ function FormSistemas(props: Props) {
         [user._id]: {
           requiereCompras: false,
           estimFin: null,
-          descripSist: '',
+          descripSist: "",
           dateSolved: null,
         },
       };
@@ -54,8 +58,10 @@ function FormSistemas(props: Props) {
   }, [props.usuarios]);
 
   useEffect(() => {
-    
-    localStorage.setItem('submittedRowsSistemas', JSON.stringify(Array.from(submittedRows)));
+    localStorage.setItem(
+      "submittedRowsSistemas",
+      JSON.stringify(Array.from(submittedRows))
+    );
   }, [submittedRows]);
 
   const handleRequiereComprasChange = (value: boolean, userId: number) => {
@@ -101,7 +107,6 @@ function FormSistemas(props: Props) {
   const handleSubmit = (userId: number) => {
     const user = props.usuarios.find((element) => element._id === userId);
     const currentUserFormValues = formValues[userId];
-
     if (
       currentUserFormValues &&
       currentUserFormValues.estimFin &&
@@ -110,9 +115,9 @@ function FormSistemas(props: Props) {
       const updatedUser = {
         ...user,
         requiereCompras: formValues[userId]?.requiereCompras || false,
-        estimFin: currentUserFormValues.estimFin?.toISOString() || '',
-        descripSist: currentUserFormValues.descripSist,
-        dateSolved: currentUserFormValues.dateSolved || undefined,
+        estimFin: currentUserFormValues.estimFin,
+        descripSist: currentUserFormValues.descripSist || "",
+        dateSolved: currentUserFormValues.dateSolved,
       };
 
       axios
@@ -129,7 +134,9 @@ function FormSistemas(props: Props) {
           });
 
           if (currentUserFormValues.dateSolved) {
-            setCompletedRows((prevCompletedRows) => new Set(prevCompletedRows).add(userId));
+            setCompletedRows((prevCompletedRows) =>
+              new Set(prevCompletedRows).add(userId)
+            );
           }
         })
         .catch((error) => {
@@ -142,14 +149,15 @@ function FormSistemas(props: Props) {
     setShowNotification(false);
   };
 
-  
   const rows = props.usuarios.map((element) => {
-    if (submittedRows.has(element._id) || completedRows.has(element._id)) {
+    if (
+      (submittedRows.has(element._id) && !element.dateSolved) ||
+      completedRows.has(element._id)
+    ) {
       return null; // Omitir las filas enviadas y completadas
     }
-
     const initialValues = formValues[element._id];
-
+    console.log("element.dateSolved", element.dateSolved);
     return (
       <tr key={element._id}>
         <td>{element.nivel}</td>
@@ -163,7 +171,7 @@ function FormSistemas(props: Props) {
             radius="md"
             size="md"
             onClick={() => handleRequiereComprasChange(true, element._id)}
-            variant={initialValues?.requiereCompras ? 'filled' : 'outline'}
+            variant={initialValues?.requiereCompras ? "filled" : "outline"}
           >
             Si
           </Button>
@@ -171,7 +179,7 @@ function FormSistemas(props: Props) {
             radius="md"
             size="md"
             onClick={() => handleRequiereComprasChange(false, element._id)}
-            variant={!initialValues?.requiereCompras ? 'filled' : 'outline'}
+            variant={!initialValues?.requiereCompras ? "filled" : "outline"}
           >
             No
           </Button>
@@ -179,26 +187,28 @@ function FormSistemas(props: Props) {
         <td>
           <DatePickerInput
             required
-            value={initialValues?.estimFin}
+            date={element.estimFin}
             onChange={(value) => handleEstimFinChange(value, element._id)}
           />
         </td>
         <td>
           <TextInput
             required
-            value={initialValues?.descripSist}
-            onChange={(event) => handleDescripSistChange(event.currentTarget.value, element._id)}
+            defaultValue={element.descripSist}
+            onChange={(event) =>
+              handleDescripSistChange(event.currentTarget.value, element._id)
+            }
           />
         </td>
         <td>
           <DatePickerInput
             required
-            value={initialValues?.dateSolved}
+            date={element.dateSolved}
             onChange={(value) => handleDateSolvedChange(value, element._id)}
           />
         </td>
-        <td style={{ color: element.dirAprobe ? 'green' : 'red' }}>
-          {element.dirAprobe ? 'Aprobado' : 'No aprobado'}
+        <td style={{ color: element.dirAprobe ? "green" : "red" }}>
+          {element.dirAprobe ? "Aprobado" : "No aprobado"}
         </td>
         <td>
           <Button
@@ -237,12 +247,12 @@ function FormSistemas(props: Props) {
       </Table>
 
       <Notification
-          title="Ticket actualizado"
-          color="blue"
-          onClose={handleNotificationClose}
-        >
-          El ticket ha sido actualizado exitosamente.
-        </Notification>
+        title="Ticket actualizado"
+        color="blue"
+        onClose={handleNotificationClose}
+      >
+        El ticket ha sido actualizado exitosamente.
+      </Notification>
     </div>
   );
 }
