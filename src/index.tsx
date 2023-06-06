@@ -8,6 +8,7 @@ import FormDocentes from './components/FormDocentes';
 import FormAdministracion from './components/FormAdministracion';
 import FormSistemas from './components/FormSistemas';
 import FormDireccion from './components/FormDireccion';
+import VistaTickets from './components/vistaTickets';
 
 const App = () => {
   const [usuarios, setUsuarios] = useState([]);
@@ -37,6 +38,7 @@ const App = () => {
           />} />
           <Route path="/administracion" element={<FormAdministracion usuarios={usuarios} />} />
           <Route path="/sistemas" element={<FormSistemas usuarios={usuarios} />} />
+          <Route path="/tickets" element={<VistaTickets usuarios={usuarios} />} />
           <Route path="/direccion" element={<FormDireccion usuarios={usuarios} />} />
         </Routes>
       </Router>

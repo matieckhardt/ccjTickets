@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, TextInput, Notification } from '@mantine/core';
+import { Table, Button, TextInput, Notification, Box } from '@mantine/core';
 import { DatePickerInput } from '@mantine/dates';
 import axios from 'axios';
 import ComprasSwitch from './switch';
@@ -19,11 +19,11 @@ interface Props {
     dateSolved: Date;
     estimFin: Date;
     requiereCompras: string;
-    dateCompras: string;
+    dateCompras: String;
   }[];
 }
 
-function FormSistemas(props: Props) {
+function VistaTickets(props: Props) {
   const [formValues, setFormValues] = useState<{
     [key: number]: {
       requiereCompras: boolean;
@@ -32,9 +32,12 @@ function FormSistemas(props: Props) {
       dateSolved: Date | null;
     };
   }>({});
+  
   const [showNotification, setShowNotification] = useState(false);
 
   useEffect(() => {
+    
+
     const initialFormValues = props.usuarios.reduce((acc, user) => {
       return {
         ...acc,
@@ -48,6 +51,8 @@ function FormSistemas(props: Props) {
     }, {});
     setFormValues(initialFormValues);
   }, [props.usuarios]);
+
+  
 
   const handleRequiereComprasChange = (value: boolean, userId: number) => {
     setFormValues((prevFormValues) => ({
@@ -117,6 +122,8 @@ function FormSistemas(props: Props) {
             delete updatedFormValues[userId];
             return updatedFormValues;
           });
+
+         
         })
         .catch((error) => {
           console.error(error);
@@ -129,6 +136,7 @@ function FormSistemas(props: Props) {
   };
 
   const rows = props.usuarios.map((element) => {
+    
     const initialValues = formValues[element._id];
 
     return (
@@ -147,15 +155,9 @@ function FormSistemas(props: Props) {
             }
           />
         </td>
-        <td>
-          <ComprasSwitch
-            onSwitchChange={(value) =>
-              handleRequiereComprasChange(value, element._id)
-            }
-          />
-        </td>
+        
         <td>{element.dateCompras}</td>
-        <td>{element.presupuesto}</td>
+        
         <td>
           <DatePickerInput
             required
@@ -173,51 +175,59 @@ function FormSistemas(props: Props) {
         <td style={{ color: element.dirAprobe ? 'green' : 'red' }}>
           {element.dirAprobe ? 'Aprobado' : 'No Aprobado'}
         </td>
-        <td>
-          <Button
-            onClick={() => handleSubmit(element._id)}
-            disabled={!initialValues}
-          >
-            Enviar
-          </Button>
-        </td>
+        
       </tr>
     );
   });
 
   return (
-    <div style={{ display: 'flex' }}>
-      <SideBar />
-      <div style={{ marginTop: '60px', marginLeft: 0 }}>
-        <Table>
-          <thead>
-            <tr>
-              <th>Nivel</th>
-              <th>Solicitante</th>
-              <th>Tipo de Problema</th>
-              <th>Descripción del Usuario</th>
-              <th>Fecha Ticket</th>
-              <th>Descripción del Sistema</th>
-              <th>Requiere Compras</th>
-              <th>Fecha arribo Administracion</th>
-              <th>Presupuesto</th>
-              <th>Estimación de Finalización</th>
-              <th>Fecha de Solución</th>
-              <th>Aprobado por Dirección</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>{rows}</tbody>
-        </Table>
-        <div />
-        {showNotification && (
-          <Notification onClose={handleNotificationClose} color="teal">
-            Los datos se modificaron correctamente.
-          </Notification>
-        )}
+    <div style={{
+        display:'flex'}}>
+        
+        
+
+        
+
+
+        <SideBar/>
+
+        
+        
+        
+
+    
+        <div style={{marginTop:'60px', marginLeft:0}}>
+
+      <Table
+      
+      >
+        <thead>
+          <tr>
+            <th>Nivel</th>
+            <th>Solicitante</th>
+            <th>Tipo de Problema</th>
+            <th>Descripción del Usuario</th>
+            <th>Fecha Ticket</th>
+            <th>Descripción del Sistema</th>
+            <th>Fecha arribo Administracion</th>
+            <th>Estimación de Finalización</th>
+            <th>Fecha de Solución</th>
+            <th>Aprobado por Dirección</th>
+          </tr>
+        </thead>
+        <tbody>{rows}</tbody>
+      </Table>
+      
       </div>
-    </div>
+      
+      
+      {showNotification && (
+          <Notification onClose={handleNotificationClose} color="teal">
+        Los datos se modificaron correctamente.
+      </Notification>
+      )}
+      </div>
   );
 }
 
-export default FormSistemas;
+export default VistaTickets;

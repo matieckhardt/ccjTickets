@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Table, NumberInput, Button, Notification } from '@mantine/core';
 import { DatePickerInput } from '@mantine/dates';
 import axios from 'axios';
-
+import SideBar from './sidebar';
 interface Props {
   usuarios: {
     _id: number;
@@ -137,6 +137,23 @@ function FormAdministracion(props: Props) {
 
   return (
     <>
+    <div style={{
+        display:'flex'}}>
+        
+        
+
+        
+
+
+        <SideBar/>
+
+        
+        
+        
+
+    
+        <div style={{marginTop:'60px', marginLeft:0}}>
+
       <Table>
         <thead>
           <tr>
@@ -152,11 +169,13 @@ function FormAdministracion(props: Props) {
         </thead>
         <tbody>{rows}</tbody>
       </Table>
+      </div>
       {showNotification && (
         <Notification onClose={handleNotificationClose} color="teal">
           Los datos se modificaron correctamente.
         </Notification>
       )}
+    </div>
     </>
   );
 }

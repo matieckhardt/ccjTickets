@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Button } from '@mantine/core';
 import axios from 'axios';
 import { Navigate, useNavigate } from 'react-router-dom';
-
+import SideBar from './sidebar';
 const useStyles = createStyles((theme) => ({
   root: {
     position: 'relative',
@@ -68,34 +68,43 @@ export function FormDocentes(props: FormDocentesProps) {
 
   
   const handleSubmit = () => {
-    axios
-      .post('https://colegiociudadjardin.edu.ar/newTicket', formValues)
-      .then(response => {
-        
-        navigate('/');
-      })
-      .catch((error) => {
-        
-        console.error(error);
-      });
+    
+    if (
+      formValues.tipoProblema &&
+      formValues.descripUser &&
+      formValues.dateTicket
+    ) {
+      axios
+        .post('https://colegiociudadjardin.edu.ar/newTicket', formValues)
+        .then(response => {
+          navigate('/tickets');
+        })
+        .catch(error => {
+          console.error(error);
+        });
+    }
   };
+  
 
   return (
-    <div style={{ width: '50vw', display: 'flex', flexDirection: 'column', gap: '10%' }}>
+    <div >
+      <SideBar/>
+      
+    <div style={{ width: '80vw', display: 'flex', flexDirection: 'column', gap: '10%', marginLeft:'15%'}}>
       <TextInput
         label="Tipo de usuario"
         value={props.userType}
         disabled={true}
         classNames={classes}
         style={{ marginTop: '15px' }}
-      />
+        />
       <TextInput
         label="Nombre de usuario"
         value={props.userName}
         disabled={true}
         classNames={classes}
         style={{ marginTop: '15px' }}
-      />
+        />
       <Select
         required
         mt="md"
@@ -106,7 +115,7 @@ export function FormDocentes(props: FormDocentesProps) {
         classNames={classes}
         value={formValues.tipoProblema}
         onChange={handleSelectChange}
-      />
+        />
 
       <TextInput
         required
@@ -116,7 +125,7 @@ export function FormDocentes(props: FormDocentesProps) {
         style={{ marginTop: '15px' }}
         value={formValues.descripUser}
         onChange={handleTextInputChange}
-      />
+        />
 
       <DatePickerInput
         required
@@ -128,9 +137,10 @@ export function FormDocentes(props: FormDocentesProps) {
         clearable={false}
         value={formValues.dateTicket}
         onChange={handleDatePickerChange}
-      />
+        />
 
       <DatePickerInput
+        required
         mt="md"
         popoverProps={{ withinPortal: true }}
         label="Fecha de hoy"
@@ -138,12 +148,25 @@ export function FormDocentes(props: FormDocentesProps) {
         placeholder="Fecha de hoy"
         classNames={classes}
         disabled={true}
-      />
+        />
 
-      <Button radius="md" size="md" onClick={handleSubmit}>
-        Enviar
-      </Button>
+<Button
+  radius="md"
+  size="md"
+  onClick={handleSubmit}
+  disabled={
+    !(
+      formValues.tipoProblema &&
+      formValues.descripUser &&
+      formValues.dateTicket
+      )
+    }
+>
+  Enviar
+</Button>
+
     </div>
+  </div>
   );
 }
 
