@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Table, Button, Notification } from '@mantine/core';
 import axios from 'axios';
 import SideBar from './sidebar';
+import ComprasSwitch from './switch';
+
 interface Props {
   usuarios: {
     _id: number;
@@ -14,26 +16,13 @@ interface Props {
     descripSist: string;
     descripUser: string;
     compras: boolean;
+    dirAprobe: boolean;
   }[];
 }
 
 function FormDireccion(props: Props) {
   const [formValues, setFormValues] = useState<{ [key: number]: { dirAprobe: boolean | undefined } }>({});
-  const [submittedRows, setSubmittedRows] = useState<Set<number>>(new Set());
   const [showNotification, setShowNotification] = useState(false);
-
-  useEffect(() => {
-    // Cargar filas enviadas desde el almacenamiento local al iniciar la página
-    const submittedRowsFromStorage = localStorage.getItem('submittedRowsDireccion');
-    if (submittedRowsFromStorage) {
-      setSubmittedRows(new Set(JSON.parse(submittedRowsFromStorage)));
-    }
-  }, []);
-
-  useEffect(() => {
-    // Guardar filas enviadas en el almacenamiento local al cambiar el estado
-    localStorage.setItem('submittedRowsDireccion', JSON.stringify(Array.from(submittedRows)));
-  }, [submittedRows]);
 
   const handleAprobarChange = (value: boolean | undefined, userId: number) => {
     setFormValues((prevFormValues) => ({
@@ -54,7 +43,6 @@ function FormDireccion(props: Props) {
         .then((response) => {
           console.log(response.data);
           setShowNotification(true);
-          setSubmittedRows((prevSubmittedRows) => new Set(prevSubmittedRows).add(userId));
           setFormValues((prevFormValues) => {
             const updatedFormValues = { ...prevFormValues };
             delete updatedFormValues[userId];
@@ -67,108 +55,68 @@ function FormDireccion(props: Props) {
     }
   };
 
-  const handleNotificationClose = () => {
-    setShowNotification(false);
-  };
+  const filteredRows = props.usuarios.filter((element) => element.presupuesto !== undefined && element.dirAprobe === null);
 
-  const filteredRows = props.usuarios.filter(
-    (element) => !submittedRows.has(element._id) && element.presupuesto !== undefined
-  );
-
-  const rows = filteredRows.map((element) => {
-    if (submittedRows.has(element._id)) {
-      return null; // Omitir las filas ya enviadas
-    }
-
-    return (
-      <tr key={element._id}>
-        <td>{element.nivel}</td>
-        <td>{element.solicitante}</td>
-        <td>{element.tipoProblema}</td>
-        <td>{element.dateTicket}</td>
-        <td>{element.presupuesto}</td>
-        <td>{element.descripSist}</td>
-        <td>{element.estimFin}</td>
-        <td>
-          <Button
-            radius="md"
-            size="md"
-            onClick={() => handleAprobarChange(true, element._id)}
-            variant={formValues[element._id]?.dirAprobe ? 'filled' : 'outline'}
-          >
-            Sí
-          </Button>
-          <Button
-            radius="md"
-            size="md"
-            onClick={() => handleAprobarChange(false, element._id)}
-            variant={!formValues[element._id]?.dirAprobe ? 'filled' : 'outline'}
-          >
-            No
-          </Button>
-        </td>
-        <td>
-          <Button
-            radius="md"
-            size="md"
-            onClick={() => handleSubmit(element._id)}
-            disabled={formValues[element._id]?.dirAprobe === undefined}
-          >
-            Enviar
-          </Button>
-        </td>
-      </tr>
-    );
-  });
+  const rows = filteredRows.map((element) => (
+    <tr key={element._id}>
+      <td>{element.nivel}</td>
+      <td>{element.solicitante}</td>
+      <td>{element.tipoProblema}</td>
+      <td>{element.dateTicket}</td>
+      <td>{element.presupuesto}</td>
+      <td>{element.descripSist}</td>
+      <td>{element.estimFin}</td>
+      <td>
+        <ComprasSwitch onSwitchChange={(value) => handleAprobarChange(value, element._id)} />
+      </td>
+      <td>
+        <Button
+          radius="md"
+          size="md"
+          onClick={() => handleSubmit(element._id)}
+          disabled={formValues[element._id]?.dirAprobe === undefined}
+        >
+          Enviar
+        </Button>
+      </td>
+    </tr>
+  ));
 
   return (
-
-    <>
-    <div style={{
-        display:'flex',
-        
-
-        }}>
-        
-        
-
-        
-
-
-        <SideBar/>
-
-        
-        
-        
-
-    
-        <div style={{marginTop:'60px', marginLeft:0}}>
-
-    
-      <Table>
-        <thead>
-          <tr>
-            <th>Tipo de usuario</th>
-            <th>Nombre</th>
-            <th>Problema</th>
-            <th>Fecha de arribo</th>
-            <th>Presupuesto</th>
-            <th>Descripción Sistemas</th>
-            <th>Fecha estimada de resolución</th>
-            <th>Aprobar</th>
-            <th>Desea guardar?</th>
-          </tr>
-        </thead>
-        <tbody>{rows}</tbody>
-      </Table>
-        </div>
-      {showNotification && (
-        <Notification onClose={handleNotificationClose} color="teal">
-          Los datos se modificaron correctamente.
-        </Notification>
-      )}
+    <div style={{ display: 'flex' }}>
+      <SideBar />
+      <div style={{ marginTop: '60px', marginLeft: 0 }}>
+        <Table>
+          <thead>
+            <tr>
+              <th>Tipo de usuario</th>
+              <th>Nombre</th>
+              <th>Problema</th>
+              <th>Fecha de arribo</th>
+              <th>Presupuesto</th>
+              <th>Descripción Sistemas</th>
+              <th>Fecha estimada de resolución</th>
+              <th>Aprobar</th>
+              <th>Desea guardar?</th>
+            </tr>
+          </thead>
+          <tbody>{rows}</tbody>
+        </Table>
       </div>
-    </>
+      {showNotification && (
+        <div
+          style={{
+            position: 'fixed',
+            bottom: '20px',
+            right: '20px',
+          }}
+        >
+          <Notification onClose={() => setShowNotification(false)} color="teal">
+            Los datos se modificaron correctamente.
+          </Notification>
+        </div>
+      )}
+    </div>
   );
 }
 

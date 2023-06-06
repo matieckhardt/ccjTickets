@@ -151,6 +151,7 @@ export function FormDocentes(props: FormDocentesProps) {
         />
 
 <Button
+  mt={10}
   radius="md"
   size="md"
   onClick={handleSubmit}

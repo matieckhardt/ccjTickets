@@ -176,7 +176,7 @@ function FormSistemas(props: Props) {
         <td>
           <Button
             onClick={() => handleSubmit(element._id)}
-            disabled={!initialValues}
+            
           >
             Enviar
           </Button>
